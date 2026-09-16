@@ -23,49 +23,52 @@ from nucleus.storage.experiment_manager import export_csv, load_experiment, save
 class MainWindow(ctk.CTk):
     def __init__(self) -> None:
         super().__init__()
-        self.title("NUCLEUS | Radioactive Decay Simulator")
-        self.geometry("1280x820")
-        self.minsize(1050, 700)
-        ctk.set_appearance_mode("dark")
-        ctk.set_default_color_theme("blue")
+        self.title("NUCLEUS / decay laboratory")
+        self.geometry("1320x860")
+        self.minsize(1100, 720)
+        ctk.set_appearance_mode("light")
+        ctk.set_default_color_theme("green")
         self.database = IsotopeDatabase()
         self.result = None
         self._build_layout()
         self._refresh_isotope_details()
 
     def _build_layout(self) -> None:
+        self.configure(fg_color="#F3EFE7")
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
-        self.sidebar = ctk.CTkFrame(self, width=220, corner_radius=0)
+        self.sidebar = ctk.CTkFrame(self, width=188, fg_color="#242A28", corner_radius=0)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
         self.sidebar.grid_propagate(False)
-        ctk.CTkLabel(self.sidebar, text="NUCLEUS", font=ctk.CTkFont(size=27, weight="bold"), text_color="#61dafb").pack(pady=(34, 3))
-        ctk.CTkLabel(self.sidebar, text="RADIOACTIVE DECAY LAB", font=ctk.CTkFont(size=11, weight="bold"), text_color="#8a9aaa").pack(pady=(0, 30))
-        for label in ["Dashboard", "Decay Simulator", "Monte Carlo Lab", "Decay Chains", "Half-Life Experiment", "Data Analysis", "Isotope Database"]:
-            ctk.CTkButton(self.sidebar, text=label, anchor="w", fg_color="transparent", hover_color="#203746", command=lambda name=label: self._select_section(name)).pack(fill="x", padx=16, pady=3)
-        ctk.CTkLabel(self.sidebar, text="WORKSPACE", anchor="w", text_color="#8a9aaa").pack(fill="x", padx=20, pady=(34, 5))
-        ctk.CTkButton(self.sidebar, text="Save experiment", command=self._save).pack(fill="x", padx=16, pady=3)
-        ctk.CTkButton(self.sidebar, text="Load experiment", command=self._load).pack(fill="x", padx=16, pady=3)
-        ctk.CTkButton(self.sidebar, text="Export CSV", command=self._export).pack(fill="x", padx=16, pady=3)
-        ctk.CTkLabel(self.sidebar, text="Educational simulator\nNot for radiation safety decisions", justify="left", text_color="#687685").pack(side="bottom", padx=20, pady=24)
+        ctk.CTkLabel(self.sidebar, text="N", font=ctk.CTkFont(size=42, weight="bold"), text_color="#E5A45D").pack(anchor="w", padx=22, pady=(28, 0))
+        ctk.CTkLabel(self.sidebar, text="NUCLEUS\nDECAY LABORATORY", justify="left", anchor="w", font=ctk.CTkFont(size=11, weight="bold"), text_color="#F3EFE7").pack(fill="x", padx=24, pady=(0, 34))
+        ctk.CTkLabel(self.sidebar, text="EXPERIMENTS", anchor="w", text_color="#AAB0A9", font=ctk.CTkFont(size=10, weight="bold")).pack(fill="x", padx=24, pady=(0, 8))
+        for index, label in enumerate(["Dashboard", "Decay Simulator", "Monte Carlo Lab", "Decay Chains", "Half-Life Experiment", "Data Analysis", "Isotope Database"], 1):
+            ctk.CTkButton(self.sidebar, text=f"{index:02d}   {label}", anchor="w", height=31, fg_color="#B95C3A" if index == 1 else "transparent", hover_color="#3A4540", text_color="#F3EFE7", command=lambda name=label: self._select_section(name)).pack(fill="x", padx=13, pady=2)
+        ctk.CTkLabel(self.sidebar, text="FILES", anchor="w", text_color="#AAB0A9", font=ctk.CTkFont(size=10, weight="bold")).pack(fill="x", padx=24, pady=(32, 8))
+        for label, command in [("Save experiment", self._save), ("Load experiment", self._load), ("Export CSV", self._export)]:
+            ctk.CTkButton(self.sidebar, text=label, anchor="w", height=29, fg_color="transparent", hover_color="#3A4540", text_color="#D1D6CC", command=command).pack(fill="x", padx=13, pady=1)
+        ctk.CTkLabel(self.sidebar, text="EDUCATIONAL MODEL\nNot for radiation safety decisions", justify="left", anchor="w", text_color="#87918A", font=ctk.CTkFont(size=10)).pack(side="bottom", fill="x", padx=24, pady=24)
 
-        self.content = ctk.CTkFrame(self, fg_color="#10181f", corner_radius=0)
+        self.content = ctk.CTkFrame(self, fg_color="#F3EFE7", corner_radius=0)
         self.content.grid(row=0, column=1, sticky="nsew", padx=1)
         self.content.grid_columnconfigure(0, weight=1)
         self.content.grid_rowconfigure(2, weight=1)
         header = ctk.CTkFrame(self.content, fg_color="transparent")
-        header.grid(row=0, column=0, sticky="ew", padx=30, pady=(27, 8))
+        header.grid(row=0, column=0, sticky="ew", padx=38, pady=(30, 12))
         header.grid_columnconfigure(0, weight=1)
-        ctk.CTkLabel(header, text="Live Decay Dashboard", font=ctk.CTkFont(size=25, weight="bold")).grid(row=0, column=0, sticky="w")
-        self.status = ctk.CTkLabel(header, text="READY", text_color="#55d6a4", font=ctk.CTkFont(size=12, weight="bold"))
+        ctk.CTkLabel(header, text="DECAY / 01", text_color="#B95C3A", font=ctk.CTkFont(size=11, weight="bold")).grid(row=0, column=0, sticky="w")
+        ctk.CTkLabel(header, text="A living record of unstable matter", text_color="#242A28", font=ctk.CTkFont(size=29, weight="bold")).grid(row=1, column=0, sticky="w", pady=(3, 0))
+        self.status = ctk.CTkLabel(header, text="[ READY ]", text_color="#47715B", font=ctk.CTkFont(size=11, weight="bold"))
         self.status.grid(row=0, column=1, sticky="e")
+        ctk.CTkLabel(header, text="ANALYTICAL + STOCHASTIC METHODS", text_color="#7B817A", font=ctk.CTkFont(size=10, weight="bold")).grid(row=1, column=1, sticky="e", pady=(3, 0))
         self._build_controls()
         self._build_metrics()
         self._build_chart()
 
     def _build_controls(self) -> None:
-        panel = ctk.CTkFrame(self.content, fg_color="#18242d")
-        panel.grid(row=1, column=0, sticky="ew", padx=30, pady=12)
+        panel = ctk.CTkFrame(self.content, fg_color="#E5DED2", corner_radius=2)
+        panel.grid(row=1, column=0, sticky="ew", padx=38, pady=10)
         for index in range(6):
             panel.grid_columnconfigure(index, weight=1)
         self.isotope_var = ctk.StringVar(value="carbon-14")
@@ -76,40 +79,43 @@ class MainWindow(ctk.CTk):
         self.seed_var = ctk.StringVar(value="12345")
         controls = [("ISOTOPE", ctk.CTkOptionMenu(panel, variable=self.isotope_var, values=[i.key for i in self.database.all()], command=lambda _: self._refresh_isotope_details())), ("INITIAL N", ctk.CTkEntry(panel, textvariable=self.nuclei_var)), ("DURATION", ctk.CTkEntry(panel, textvariable=self.duration_var)), ("STEP", ctk.CTkEntry(panel, textvariable=self.step_var)), ("TIME UNIT", ctk.CTkOptionMenu(panel, variable=self.unit_var, values=list(TIME_UNITS))), ("RANDOM SEED", ctk.CTkEntry(panel, textvariable=self.seed_var))]
         for index, (label, widget) in enumerate(controls):
-            ctk.CTkLabel(panel, text=label, text_color="#8a9aaa", font=ctk.CTkFont(size=10, weight="bold")).grid(row=0, column=index, sticky="w", padx=12, pady=(13, 3))
+            ctk.CTkLabel(panel, text=label, text_color="#6F756E", font=ctk.CTkFont(size=10, weight="bold")).grid(row=0, column=index, sticky="w", padx=12, pady=(13, 3))
             widget.grid(row=1, column=index, sticky="ew", padx=8, pady=(0, 14))
-        self.run_button = ctk.CTkButton(panel, text="RUN MONTE CARLO", fg_color="#177d75", hover_color="#1b968c", command=self._run)
+        self.run_button = ctk.CTkButton(panel, text="RUN MONTE CARLO  >", fg_color="#B95C3A", hover_color="#99462D", height=34, command=self._run)
         self.run_button.grid(row=2, column=0, columnspan=3, sticky="ew", padx=10, pady=(0, 12))
-        ctk.CTkButton(panel, text="ANALYTICAL CURVE", command=self._run_analytical).grid(row=2, column=3, columnspan=3, sticky="ew", padx=10, pady=(0, 12))
+        ctk.CTkButton(panel, text="ANALYTICAL CURVE  >", fg_color="#47715B", hover_color="#365A46", height=34, command=self._run_analytical).grid(row=2, column=3, columnspan=3, sticky="ew", padx=10, pady=(0, 12))
 
     def _build_metrics(self) -> None:
         self.metrics = ctk.CTkFrame(self.content, fg_color="transparent")
-        self.metrics.grid(row=3, column=0, sticky="ew", padx=30, pady=10)
+        self.metrics.grid(row=3, column=0, sticky="ew", padx=38, pady=12)
         for index in range(4):
             self.metrics.grid_columnconfigure(index, weight=1)
         self.metric_labels: dict[str, ctk.CTkLabel] = {}
         for index, (key, title) in enumerate([("remaining", "REMAINING"), ("activity", "ACTIVITY (Bq)"), ("decayed", "DECAYED"), ("half_life", "HALF-LIFE")]):
-            card = ctk.CTkFrame(self.metrics, fg_color="#18242d")
+            card = ctk.CTkFrame(self.metrics, fg_color="#E5DED2", corner_radius=2)
             card.grid(row=0, column=index, sticky="ew", padx=(0 if index == 0 else 6, 6))
-            ctk.CTkLabel(card, text=title, text_color="#8a9aaa", font=ctk.CTkFont(size=10, weight="bold")).pack(anchor="w", padx=15, pady=(13, 2))
-            label = ctk.CTkLabel(card, text="--", font=ctk.CTkFont(size=21, weight="bold"))
+            ctk.CTkLabel(card, text=title, text_color="#6F756E", font=ctk.CTkFont(size=10, weight="bold")).pack(anchor="w", padx=15, pady=(13, 2))
+            label = ctk.CTkLabel(card, text="--", text_color="#242A28", font=ctk.CTkFont(size=21, weight="bold"))
             label.pack(anchor="w", padx=15, pady=(0, 13))
             self.metric_labels[key] = label
-        self.metrics.grid(row=3, column=0, sticky="ew", padx=30, pady=10)
+        self.metrics.grid(row=3, column=0, sticky="ew", padx=38, pady=12)
 
     def _build_chart(self) -> None:
-        self.figure = Figure(figsize=(8, 4.3), dpi=100, facecolor="#10181f")
-        self.axes = self.figure.add_subplot(111, facecolor="#18242d")
+        self.figure = Figure(figsize=(8, 4.3), dpi=100, facecolor="#F3EFE7")
+        self.axes = self.figure.add_subplot(111, facecolor="#FBF9F4")
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.content)
-        self.canvas.get_tk_widget().grid(row=2, column=0, sticky="nsew", padx=30, pady=8)
+        self.canvas.get_tk_widget().grid(row=2, column=0, sticky="nsew", padx=38, pady=8)
         self._draw_empty_chart()
 
     def _draw_empty_chart(self) -> None:
         self.axes.clear()
-        self.axes.set_title("Select an experiment to plot", color="#d7e2ea")
+        self.axes.set_title("Select an experiment to plot", color="#242A28", loc="left", pad=16, fontweight="bold")
         self.axes.set_xlabel("Time")
         self.axes.set_ylabel("Number of nuclei")
-        self.axes.grid(alpha=0.18)
+        self.axes.grid(alpha=0.2, color="#AFA79A")
+        self.axes.tick_params(colors="#6F756E")
+        for spine in self.axes.spines.values():
+            spine.set_color("#D6CEC0")
         self.figure.tight_layout()
         self.canvas.draw_idle()
 
@@ -149,12 +155,16 @@ class MainWindow(ctk.CTk):
     def _plot(self, times: np.ndarray, values: np.ndarray, label: str, isotope: object) -> None:
         self.axes.clear()
         display_times = np.asarray([from_seconds(value, self.unit_var.get()) for value in times])
-        self.axes.plot(display_times, values, color="#61dafb" if label == "Theoretical" else "#f3b562", linewidth=2, label=label)
-        self.axes.set_title(f"{isotope.name} decay", color="#d7e2ea")
+        self.axes.plot(display_times, values, color="#47715B" if label == "Theoretical" else "#B95C3A", linewidth=2.5, label=label)
+        self.axes.fill_between(display_times, values, alpha=0.08, color="#47715B" if label == "Theoretical" else "#B95C3A")
+        self.axes.set_title(f"{isotope.name} decay", color="#242A28", loc="left", pad=16, fontweight="bold")
         self.axes.set_xlabel(f"Time ({self.unit_var.get().replace('_', ' ')})")
         self.axes.set_ylabel("Nuclei remaining")
-        self.axes.grid(alpha=0.18)
-        self.axes.legend(frameon=False)
+        self.axes.grid(alpha=0.2, color="#AFA79A")
+        self.axes.tick_params(colors="#6F756E")
+        self.axes.legend(frameon=False, loc="upper right")
+        for spine in self.axes.spines.values():
+            spine.set_color("#D6CEC0")
         self.figure.tight_layout()
         self.canvas.draw_idle()
 
